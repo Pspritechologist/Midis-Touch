@@ -1,0 +1,45 @@
+{
+	// Use IntelliSense to learn about possible attributes.
+	// Hover to view descriptions of existing attributes.
+	// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"type": "lldb",
+			"request": "launch",
+			"name": "Debug executable 'midis-touch'",
+			"cargo": {
+				"args": [
+					"build",
+					"--bin=midis-touch",
+					"--package=midis-touch"
+				],
+				"filter": {
+					"name": "midis-touch",
+					"kind": "bin"
+				}
+			},
+			"args": "test.mid",
+			"cwd": "${workspaceFolder}"
+		},
+		{
+			"type": "lldb",
+			"request": "launch",
+			"name": "Debug unit tests in executable 'midis-touch'",
+			"cargo": {
+				"args": [
+					"test",
+					"--no-run",
+					"--bin=midis-touch",
+					"--package=midis-touch"
+				],
+				"filter": {
+					"name": "midis-touch",
+					"kind": "bin"
+				}
+			},
+			"args": [],
+			"cwd": "${workspaceFolder}"
+		}
+	]
+}
