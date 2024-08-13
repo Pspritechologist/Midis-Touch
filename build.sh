@@ -3,7 +3,10 @@ build() {
 }
 
 move() {
-	cp target/release/midis-touch bin/$1/midis-touch
+	mkdir -p bin/$1
+	cp target/release/midis-touch bin/$1/
+	# cp target/release/midis-hw-player bin/$1/
+	cp target/release/midis-sw-player bin/$1/
 }
 
 # Build once for 60kb_font, 100kb_font, 200kb_font, 1mb_font, and 7mb_font.

@@ -1,27 +1,17 @@
 #![feature(duration_constructors)]
 
-use std::{fs::File, sync::Arc, time::Duration};
+use std::{cmp::min, fmt::{Debug, Display}, fs::File, sync::{Arc, Mutex}, time::Duration};
 
+use midis_touch::soundfonts::SoundFontUtils;
 use rustysynth::{MidiFile, MidiFileSequencer, SoundFont, Synthesizer, SynthesizerSettings};
 use tinyaudio::{run_output_device, OutputDeviceParameters};
 
-#[cfg(feature = "7mb_font")]
-const SF2_BYTES: &[u8] = include_bytes!("../soundfonts/7mb_font.sf2");
-#[cfg(feature = "1mb_font")]
-const SF2_BYTES: &[u8] = include_bytes!("../soundfonts/1mb_font.sf2");
-#[cfg(feature = "200kb_font")]
-const SF2_BYTES: &[u8] = include_bytes!("../soundfonts/200kb_font.sf2");
-#[cfg(feature = "100kb_font")]
-const SF2_BYTES: &[u8] = include_bytes!("../soundfonts/100kb_font.sf2");
-#[cfg(feature = "60kb_font")]
-const SF2_BYTES: &[u8] = include_bytes!("../soundfonts/60kb_font.sf2");
-
-fn main() {
+fn main() -> Result<(), AppError> {
     // Get midi file as first argument.
     let args: Vec<String> = std::env::args().collect();
     if args.len() < 2 {
-        eprintln!("Usage: midis-touch <path to midi>");
-        return;
+        println!("Usage: midis-touch <path to midi>");
+        return Ok(());
     }
     let midi_file_path = &args[1];
 
@@ -36,41 +26,34 @@ fn main() {
     let mut left: Vec<f32> = vec![0_f32; params.channel_sample_count];
     let mut right: Vec<f32> = vec![0_f32; params.channel_sample_count];
 
-    // Load the SoundFont.
-    #[allow(const_item_mutation)]
-    let sound_font = Arc::new(SoundFont::new(&mut SF2_BYTES).expect("Failed to initialize soundfont."));
-
     // Load the MIDI file.
     let mut midi_file = match File::open(midi_file_path) {
         Ok(file) => file,
-        Err(e) => {
-            eprintln!("Failed to load MIDI file: {e}");
-            return;
-        }
+        Err(e) => return Err(format!("Failed to open MIDI file '{midi_file_path}': {e}").into())
     };
 
     let midi_file = Arc::new(match MidiFile::new(&mut midi_file) {
         Ok(midi_file) => midi_file,
-        Err(e) => {
-            eprintln!("Failed to load MIDI file: {e}");
-            return;
-        },
+        Err(e) => return Err(format!("Failed to load MIDI data: {e}").into())
     });
 
     // Create the MIDI file sequencer.
     let settings = SynthesizerSettings::new(params.sample_rate as i32);
-    let synthesizer = Synthesizer::new(&sound_font, &settings).expect("Failed to initialize synthesizer.");
+    let synthesizer = Synthesizer::new(&SoundFont::default(), &settings)?;
     let mut sequencer = MidiFileSequencer::new(synthesizer);
 
     // Play the MIDI file.
     sequencer.play(&midi_file, false);
+
+    let sequencer = Arc::new(Mutex::new(sequencer));
+    let seq_ref = sequencer.clone();
 
     println!("Playing MIDI file...");
     // Start the audio output.
     // You need to keep a reference to the device to keep the audio output running.
     let _device = match run_output_device(params, {
         move |data| {
-            sequencer.render(&mut left[..], &mut right[..]);
+            seq_ref.lock().unwrap().render(&mut left[..], &mut right[..]);
             for (i, val) in data.chunks_mut(2).enumerate() {
                 val[0] = left[i];
                 val[1] = right[i];
@@ -78,13 +61,37 @@ fn main() {
         }
     }) {
         Ok(device) => device,
-        Err(e) => {
-            eprintln!("Failed to start audio output: {e}");
-            return;
-        }
+        Err(e) => return Err(format!("Failed to start audio output: {e}").into())
     };
 
     println!("Waiting for MIDI file to finish...");
-    // Wait for the duration of the MIDI file.
-    std::thread::sleep(Duration::from_secs_f64(midi_file.get_length()));
+    while !sequencer.lock().unwrap().end_of_sequence() {
+        std::thread::sleep(Duration::from_millis(100));
+    }
+
+    Ok(())
+}
+
+struct AppError(Box<dyn Display>);
+
+impl Debug for AppError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0.to_string())
+    }
+}
+impl Display for AppError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0.to_string())
+    }
+}
+
+impl From<String> for AppError {
+    fn from(e: String) -> Self {
+        Self(Box::new(e))
+    }
+}
+impl From<rustysynth::SynthesizerError> for AppError {
+    fn from(e: rustysynth::SynthesizerError) -> Self {
+        Self(Box::new(e))
+    }
 }
