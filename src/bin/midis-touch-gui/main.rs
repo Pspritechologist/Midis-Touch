@@ -1,5 +1,8 @@
-use std::{cmp::min, fmt::{Debug, Display}, fs::File, sync::{Arc, Mutex}, time::Duration};
+mod app;
 
+use std::{fmt::{Debug, Display}, fs::File, sync::{Arc, Mutex}};
+
+use eframe::{run_native, NativeOptions};
 use midis_touch::soundfonts::SoundFontUtils;
 use rustysynth::{MidiFile, MidiFileSequencer, SoundFont, Synthesizer, SynthesizerSettings};
 use tinyaudio::{run_output_device, OutputDeviceParameters};
@@ -46,6 +49,9 @@ fn main() -> Result<(), AppError> {
     let sequencer = Arc::new(Mutex::new(sequencer));
     let seq_ref = sequencer.clone();
 
+	let app = app::App::new(sequencer.clone());
+	// let app_state = app.state.clone();
+
     println!("Playing MIDI file...");
     // Start the audio output.
     // You need to keep a reference to the device to keep the audio output running.
@@ -62,10 +68,19 @@ fn main() -> Result<(), AppError> {
         Err(e) => return Err(format!("Failed to start audio output: {e}").into())
     };
 
-    println!("Waiting for MIDI file to finish...");
-    while !sequencer.lock().unwrap().end_of_sequence() {
-        std::thread::sleep(Duration::from_millis(100));
-    }
+	let opts = NativeOptions {
+		centered: true,
+		default_theme: eframe::Theme::Dark,
+
+		..Default::default()
+	};
+
+	run_native("Midis Touch", opts, Box::new(|_| Ok(Box::new(app)))).map_err(|e| e.to_string())?;
+
+    // println!("Waiting for MIDI file to finish...");
+    // while !sequencer.lock().unwrap().end_of_sequence() {
+    //     std::thread::sleep(Duration::from_millis(100));
+    // }
 
     Ok(())
 }
@@ -93,3 +108,4 @@ impl From<rustysynth::SynthesizerError> for AppError {
         Self(Box::new(e))
     }
 }
+

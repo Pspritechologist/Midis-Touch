@@ -12,7 +12,9 @@
 				"args": [
 					"build",
 					"--bin=midis-touch",
-					"--package=midis-touch"
+					"--package=midis-touch",
+					"--no-default-features",
+					"--features=7mb_font",
 				],
 				"filter": {
 					"name": "midis-touch",
@@ -22,6 +24,47 @@
 			"args": "test.mid",
 			"cwd": "${workspaceFolder}"
 		},
+		
+		{
+			"type": "lldb",
+			"request": "launch",
+			"name": "Debug executable 'midis-touch-gui'",
+			"cargo": {
+				"args": [
+					"build",
+					"--bin=midis-touch-gui",
+					"--package=midis-touch",
+					"--no-default-features",
+					"--features=7mb_font",
+				],
+				"filter": {
+					"name": "midis-touch-gui",
+					"kind": "bin"
+				}
+			},
+			"args": "test.mid",
+			"cwd": "${workspaceFolder}"
+		},
+
+		{
+			"type": "lldb",
+			"request": "launch",
+			"name": "Debug executable 'midis-hw-player'",
+			"cargo": {
+				"args": [
+					"build",
+					"--bin=midis-hw-player",
+					"--package=midis-touch"
+				],
+				"filter": {
+					"name": "midis-hw-player",
+					"kind": "bin"
+				}
+			},
+			"args": "test.mid",
+			"cwd": "${workspaceFolder}"
+		},
+
 		{
 			"type": "lldb",
 			"request": "launch",

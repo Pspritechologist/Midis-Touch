@@ -32,14 +32,14 @@ pub trait SoundFontUtils {
 	/// Returns a new `Arc` to the [Default Soundfont](DEFAULT_FONT).
 	fn default() -> Arc<SoundFont>;
 	/// Tries to load a soundfont from a given file path.
-	fn try_from_path(path: &str) -> Result<Result<Arc<SoundFont>, std::io::Error>, SoundFontError>;
+	fn try_from_path(path: std::path::PathBuf) -> Result<Result<Arc<SoundFont>, std::io::Error>, SoundFontError>;
 	/// Tries to load a soundfont from a given byte slice.
 	fn try_from_bytes(bytes: &[u8]) -> Result<Arc<SoundFont>, SoundFontError>;
 
 	/// Loads a soundfont from a given file path.  
 	/// Panics if the soundfont cannot be loaded.
 	/// Does not panic if the file is not found.
-	fn from_path(path: &str) -> Result<Arc<SoundFont>, std::io::Error> {
+	fn from_path(path: std::path::PathBuf) -> Result<Arc<SoundFont>, std::io::Error> {
 		Self::try_from_path(path).expect("Failed to initialize soundfont")
 	}
 
@@ -51,7 +51,7 @@ pub trait SoundFontUtils {
 }
 
 impl SoundFontUtils for SoundFont {
-	fn try_from_path(path: &str) -> Result<Result<Arc<SoundFont>, std::io::Error>, SoundFontError> {
+	fn try_from_path(path: std::path::PathBuf) -> Result<Result<Arc<SoundFont>, std::io::Error>, SoundFontError> {
 		Ok(Ok(
 			Arc::new(SoundFont::new(&mut std::fs::read(path)?.as_slice())?)
 		))
