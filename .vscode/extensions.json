@@ -2,6 +2,7 @@
     "recommendations": [
         "vadimcn.vscode-lldb",
         "fill-labs.dependi",
-        "1yib.rust-bundle"
+        "1yib.rust-bundle",
+        "itsyaasir.rust-feature-toggler",
     ]
 }

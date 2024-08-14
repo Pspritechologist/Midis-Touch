@@ -1,5 +1,8 @@
 {
 	"cSpell.words": [
 		"soundfont"
+	],
+	"rust-analyzer.cargo.features": [
+		"gui"
 	]
 }

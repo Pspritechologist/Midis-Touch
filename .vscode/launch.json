@@ -16,10 +16,7 @@
 					"--no-default-features",
 					"--features=7mb_font",
 				],
-				"filter": {
-					"name": "midis-touch",
-					"kind": "bin"
-				}
+				"filter": { "name": "midis-touch", "kind": "bin", },
 			},
 			"args": "test.mid",
 			"cwd": "${workspaceFolder}"
@@ -37,10 +34,31 @@
 					"--no-default-features",
 					"--features=7mb_font",
 				],
-				"filter": {
-					"name": "midis-touch-gui",
-					"kind": "bin"
-				}
+				"filter": { "name": "midis-touch-gui", "kind": "bin", },
+			},
+			"args": "test.mid",
+			"cwd": "${workspaceFolder}"
+		},
+
+		{
+			"type": "lldb",
+			"request": "launch",
+			"name": "Debug executable 'midis-sw-player'",
+			"cargo": {
+				"args": [ "build", "--bin=midis-sw-player", "--package=midis-touch", ],
+				"filter": { "name": "midis-sw-player", "kind": "bin", },
+			},
+			"args": "test.mid",
+			"cwd": "${workspaceFolder}"
+		},
+
+		{
+			"type": "lldb",
+			"request": "launch",
+			"name": "Debug executable 'midis-sw-player + gui'",
+			"cargo": {
+				"args": [ "build", "--bin=midis-sw-player", "--package=midis-touch", "--features=gui", ],
+				"filter": { "name": "midis-sw-player", "kind": "bin", },
 			},
 			"args": "test.mid",
 			"cwd": "${workspaceFolder}"
@@ -51,15 +69,8 @@
 			"request": "launch",
 			"name": "Debug executable 'midis-hw-player'",
 			"cargo": {
-				"args": [
-					"build",
-					"--bin=midis-hw-player",
-					"--package=midis-touch"
-				],
-				"filter": {
-					"name": "midis-hw-player",
-					"kind": "bin"
-				}
+				"args": [ "build", "--bin=midis-hw-player", "--package=midis-touch", ],
+				"filter": { "name": "midis-hw-player", "kind": "bin", },
 			},
 			"args": "test.mid",
 			"cwd": "${workspaceFolder}"
@@ -76,10 +87,7 @@
 					"--bin=midis-touch",
 					"--package=midis-touch"
 				],
-				"filter": {
-					"name": "midis-touch",
-					"kind": "bin"
-				}
+				"filter": { "name": "midis-touch", "kind": "bin", },
 			},
 			"args": [],
 			"cwd": "${workspaceFolder}"

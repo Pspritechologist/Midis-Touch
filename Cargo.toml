@@ -31,3 +31,5 @@ default = [ "1mb_font" ]
 7mb_font = [ ]
 # Uses the file at '/root/custom_font.sf2', placed next to 'Cargo.toml'.
 custom_font = [ ]
+
+gui = [ ]
